@@ -1,0 +1,72 @@
+version: "3.7"
+
+#services:
+#  docs:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#      target: dev
+#    ports:
+#      - 8000:8000
+#    volumes:
+#      - ./:/app
+
+services:
+  app:
+    build: 
+      context: ./app
+      dockerfile: Dockerfile
+    image: sample-app
+    container_name: sample-app
+    ports:
+      - 3000:3000
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+      MYSQL_DB: todos
+      DD_SERVICE: todo
+      DD_AGENT_HOST: datadog
+
+  mysql:
+    image: mysql:5.7
+    container_name: sample-mysql
+    volumes:
+      - todo-mysql-data:/var/lib/mysql
+    environment: 
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: todos
+    
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: sample-nginx
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "nginx", "service": "sample-nginx"}]'
+    volumes:
+      - './nginx/nginx.conf:/etc/nginx/nginx.conf:ro'
+      - './nginx/dd-config.json:/etc/nginx/dd-config.json:ro'
+    ports:
+      - "8888:80"
+
+  datadog: 
+    image: datadog/agent:7
+    container_name: sample-ddagent
+    environment:
+      - DD_API_KEY
+      - DD_SITE=datadoghq.com
+      - DD_ENV=macbook
+      - DD_HOSTNAME=macbook
+      - DD_LOGS_ENABLED=true
+      - DD_LOGS_CONFIG_CONTAINER_COLLET_ALL=true
+      - DD_APM_NON_LOCAL_TRAFFIC=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+    ports:
+      - "8126:8126/tcp"
+
+volumes:
+  todo-mysql-data:
