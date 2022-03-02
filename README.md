@@ -8,6 +8,7 @@
   - https://github.com/DataDog/dd-opentracing-cpp/tree/master/examples/nginx-tracing
 
 - How to run
+  - `export DD_API_KEY="YourDatadogApiKey"`
   - `docker-compose build`
   - `docker-compose up`
   - Open http://localhost:8888
