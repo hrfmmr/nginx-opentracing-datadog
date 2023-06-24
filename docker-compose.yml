@@ -1,30 +1,37 @@
 version: "3.7"
 
 services:
-  app:
-    build: 
-      context: ./app
+  api:
+    build:
+      context: ./api
       dockerfile: Dockerfile
-    image: sample-app
-    container_name: sample-app
+    container_name: sample-api
     ports:
-      - 3000:3000
-    environment:
-      MYSQL_HOST: mysql
-      MYSQL_USER: root
-      MYSQL_PASSWORD: secret
-      MYSQL_DB: todos
-      DD_SERVICE: todo
-      DD_AGENT_HOST: datadog
+      - 8080:8080
+  # app:
+    # build: 
+      # context: ./app
+      # dockerfile: Dockerfile
+    # image: sample-app
+    # container_name: sample-app
+    # ports:
+      # - 3000:3000
+    # environment:
+      # MYSQL_HOST: mysql
+      # MYSQL_USER: root
+      # MYSQL_PASSWORD: secret
+      # MYSQL_DB: todos
+      # DD_SERVICE: todo
+      # DD_AGENT_HOST: datadog
 
-  mysql:
-    image: mysql:5.7
-    container_name: sample-mysql
-    volumes:
-      - todo-mysql-data:/var/lib/mysql
-    environment: 
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: todos
+  # mysql:
+    # image: mysql:5.7
+    # container_name: sample-mysql
+    # volumes:
+      # - todo-mysql-data:/var/lib/mysql
+    # environment: 
+      # MYSQL_ROOT_PASSWORD: secret
+      # MYSQL_DATABASE: todos
     
   nginx:
     build:
@@ -59,5 +66,5 @@ services:
     ports:
       - "8126:8126/tcp"
 
-volumes:
-  todo-mysql-data:
+# volumes:
+  # todo-mysql-data:
