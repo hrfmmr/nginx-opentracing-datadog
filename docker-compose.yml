@@ -1,16 +1,5 @@
 version: "3.7"
 
-#services:
-#  docs:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#      target: dev
-#    ports:
-#      - 8000:8000
-#    volumes:
-#      - ./:/app
-
 services:
   app:
     build: 
@@ -43,10 +32,12 @@ services:
       dockerfile: Dockerfile
     container_name: sample-nginx
     labels:
+      com.datadoghq.ad.check_names: '["nginx"]'
+      com.datadoghq.ad.init_configs: '[{}]'
+      com.datadoghq.ad.instances: '[{"nginx_status_url": "http://%%host%%:81/nginx_status/"}]'
       com.datadoghq.ad.logs: '[{"source": "nginx", "service": "sample-nginx"}]'
     volumes:
       - './nginx/nginx.conf:/etc/nginx/nginx.conf:ro'
-      - './nginx/dd-config.json:/etc/nginx/dd-config.json:ro'
     ports:
       - "8888:80"
 
