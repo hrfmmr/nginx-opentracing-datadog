@@ -38,6 +38,7 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     container_name: sample-nginx
+    image: sample-nginx
     labels:
       com.datadoghq.ad.check_names: '["nginx"]'
       com.datadoghq.ad.init_configs: '[{}]'
@@ -47,6 +48,9 @@ services:
       - './nginx/nginx.conf:/etc/nginx/nginx.conf:ro'
     ports:
       - "8888:80"
+    environment:
+      DD_AGENT_HOST: datadog
+      DD_TRACE_AGENT_PORT: 8126
 
   datadog: 
     image: datadog/agent:7
