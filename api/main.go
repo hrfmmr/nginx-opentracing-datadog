@@ -1,17 +1,22 @@
 package main
 
 import (
-	"log"
 	"math/rand"
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
+	muxtrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/gorilla/mux"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
+var log = NewLogger("/app/prod.log")
+
 func randomStatusHandler(w http.ResponseWriter, r *http.Request) {
-	// Log request information
-	log.Printf("Received request: method=%s, url=%s, remote_addr=%s\n", r.Method, r.URL, r.RemoteAddr)
+	span := tracer.StartSpan("http.request", tracer.ResourceName("GET /"))
+	defer span.Finish()
+
+	loge := log.WithFields(logrus.Fields{"url": r.URL, "method": r.Method, "remote_addr": r.RemoteAddr})
 
 	statusCodes := []int{http.StatusOK, http.StatusBadRequest, http.StatusInternalServerError}
 	rand.Seed(time.Now().UnixNano())
@@ -20,17 +25,24 @@ func randomStatusHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(randomStatusCode)
 	switch randomStatusCode {
 	case http.StatusOK:
+		loge.Infof("ok %v", span)
 		w.Write([]byte("Status OK"))
 	case http.StatusBadRequest:
+		loge.Infof("client error %v", span)
 		w.Write([]byte("Bad Request"))
 	case http.StatusInternalServerError:
+		loge.Infof("server error %v", span)
 		w.Write([]byte("Internal Server Error"))
 	}
 }
 
 func main() {
-	r := mux.NewRouter()
+	tracer.Start()
+	defer tracer.Stop()
+
+	r := muxtrace.NewRouter()
 	r.HandleFunc("/", randomStatusHandler)
 
+	log.Println("Started")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

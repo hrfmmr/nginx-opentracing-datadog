@@ -5,9 +5,14 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
+      args:
+        DD_API_KEY: ${DD_API_KEY}
     container_name: sample-api
     ports:
       - 8080:8080
+    environment:
+      - DD_ENV=dev
+      - DD_HOSTNAME=local
   # app:
     # build: 
       # context: ./app
@@ -40,6 +45,9 @@ services:
     container_name: sample-nginx
     image: sample-nginx
     labels:
+      com.datadoghq.tags.env: 'dev'
+      com.datadoghq.tags.service: 'sample-nginx'
+      com.datadoghq.tags.version: '0.1.0'
       com.datadoghq.ad.check_names: '["nginx"]'
       com.datadoghq.ad.init_configs: '[{}]'
       com.datadoghq.ad.instances: '[{"nginx_status_url": "http://%%host%%:81/nginx_status/"}]'
@@ -58,8 +66,8 @@ services:
     environment:
       - DD_API_KEY
       - DD_SITE=datadoghq.com
-      - DD_ENV=macbook
-      - DD_HOSTNAME=macbook
+      - DD_ENV=dev
+      - DD_HOSTNAME=local
       - DD_LOGS_ENABLED=true
       - DD_LOGS_CONFIG_CONTAINER_COLLET_ALL=true
       - DD_APM_NON_LOCAL_TRAFFIC=true
