@@ -13,7 +13,8 @@ import (
 var log = NewLogger("/app/prod.log")
 
 func randomStatusHandler(w http.ResponseWriter, r *http.Request) {
-	span := tracer.StartSpan("http.request", tracer.ResourceName("GET /"))
+	spanCtx := r.Context()
+	span, _ := tracer.StartSpanFromContext(spanCtx, "testSpan")
 	defer span.Finish()
 
 	loge := log.WithFields(logrus.Fields{"url": r.URL, "method": r.Method, "remote_addr": r.RemoteAddr})
