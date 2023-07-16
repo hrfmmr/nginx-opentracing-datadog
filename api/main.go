@@ -13,11 +13,13 @@ import (
 var log = NewLogger("/app/prod.log")
 
 func randomStatusHandler(w http.ResponseWriter, r *http.Request) {
-	spanCtx := r.Context()
-	span, _ := tracer.StartSpanFromContext(spanCtx, "testSpan")
+	rctx := r.Context()
+	span, sctx := tracer.StartSpanFromContext(rctx, "testSpan")
 	defer span.Finish()
 
-	loge := log.WithFields(logrus.Fields{"url": r.URL, "method": r.Method, "remote_addr": r.RemoteAddr})
+	loge := log.
+		WithContext(sctx).
+		WithFields(logrus.Fields{"url": r.URL, "method": r.Method, "remote_addr": r.RemoteAddr})
 
 	statusCodes := []int{http.StatusOK, http.StatusBadRequest, http.StatusInternalServerError}
 	rand.Seed(time.Now().UnixNano())
@@ -26,13 +28,13 @@ func randomStatusHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(randomStatusCode)
 	switch randomStatusCode {
 	case http.StatusOK:
-		loge.Infof("ok %v", span)
+		loge.Info("ok")
 		w.Write([]byte("Status OK"))
 	case http.StatusBadRequest:
-		loge.Infof("client error %v", span)
+		loge.Info("client error")
 		w.Write([]byte("Bad Request"))
 	case http.StatusInternalServerError:
-		loge.Infof("server error %v", span)
+		loge.Info("server error")
 		w.Write([]byte("Internal Server Error"))
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
+	ddtracelogrus "gopkg.in/DataDog/dd-trace-go.v1/contrib/sirupsen/logrus"
 )
 
 type Logger struct {
@@ -24,5 +25,6 @@ func NewLogger(fpath string) *Logger {
 
 	log.SetFormatter(&logrus.JSONFormatter{})
 	log.SetLevel(logrus.InfoLevel)
+	log.AddHook(&ddtracelogrus.DDContextLogHook{})
 	return &Logger{log}
 }
